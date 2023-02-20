@@ -8,7 +8,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
-
 public class AesDecryptor {
 
     public AesDecryptor(String key, String iv, String encryptedData) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, ShortBufferException, IOException, InvalidAlgorithmParameterException, InterruptedException {
@@ -27,7 +26,4 @@ public class AesDecryptor {
         AesDecryptor aesDecryptorTestOne = new AesDecryptor("0123456789abcdef","0000000000000000","1ff4ec7cef0e00d81b2d55a4bfdad4ba");
         AesDecryptor aesDecryptorTestTwo = new AesDecryptor("0011223344556677","0123456789abcdef","9e4816cc13810b8424d788fbcd4b006b31bf45f5f9191072820ae0a545500c966cf22afda1002466a78b7e4ddf02587f");
     }
-
-
-
 }
