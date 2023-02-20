@@ -1,13 +1,14 @@
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
 import javax.crypto.spec.OAEPParameterSpec;
 import javax.crypto.spec.PSource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.interfaces.RSAPublicKey;
+import java.security.interfaces.*;
+import java.util.Arrays;
 import java.util.Base64;
 import java.math.BigInteger;
 import java.security.KeyPair;
@@ -22,9 +23,10 @@ import javax.crypto.spec.PSource;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.HexFormat;
 
 public class RSANew {
-    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException {
+    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidKeyException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, IOException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
         KeyPair keyPair = keyGen.generateKeyPair();
@@ -33,43 +35,20 @@ public class RSANew {
 
         RSAPublicKey rsaPub  = (RSAPublicKey) (pubKey);
         RSAPrivateKey rsaPriv  = (RSAPrivateKey) (privKey);
-        BigInteger publicKeyModulus = rsaPub.getModulus();
-        BigInteger privateKeyModulus  = rsaPriv.getModulus();
+        BigInteger privateKeyExponent  = rsaPriv.getPrivateExponent();
+        BigInteger privateKeyMod = rsaPriv.getModulus();
 
-        System.out.println("publicKeyModulus: " + publicKeyModulus);
-        System.out.println("privateKeyModulus: " + privateKeyModulus);
+        Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
+        cipher.init(Cipher.ENCRYPT_MODE, rsaPub);
+        String message = "test";
+        byte[] encryptedMessage = cipher.doFinal(message.getBytes());
 
-        RSA rsa = new RSA(publicKeyModulus.toString(), privateKeyModulus.toString(), rsaPub.getPublicExponent().toString());
-        BigInteger c = rsa.encrypt(new BigInteger("65"));
-        System.out.println("dec(c)  = " + rsa.decrypt(c));
-/*
-        System.out.println(c);
+        var messageToDecrypt = new BigInteger(1, encryptedMessage);
+        BigInteger decryptedMessage = messageToDecrypt.modPow(privateKeyExponent, privateKeyMod);
 
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.DECRYPT_MODE, privKey);
-        byte[] decryptedMessage = cipher.doFinal(c.toByteArray());
-        BigInteger decryptedMessageInt = new BigInteger(decryptedMessage);
+        byte[] bytes = decryptedMessage.toByteArray();
+        String str = new String(bytes, StandardCharsets.UTF_8);
 
-        System.out.println(decryptedMessageInt);
-*/
-
-
-
-
-        /*
-        Cipher cipher = Cipher.getInstance("RSA");
-        cipher.init(Cipher.ENCRYPT_MODE, pubKey);
-        byte[] message = new BigInteger("65").toByteArray();
-        byte[] encryptedMessage = cipher.doFinal(message);
-
-        cipher.init(Cipher.DECRYPT_MODE, privKey);
-        byte[] decryptedMessage = cipher.doFinal(encryptedMessage);
-        BigInteger decryptedMessageInt = new BigInteger(decryptedMessage);
-
-        System.out.println("Original message: " + new BigInteger("65"));
-        System.out.println("Encrypted message: " + new BigInteger(encryptedMessage));
-        System.out.println("Decrypted message: " + decryptedMessageInt);
-         */
+        System.out.println("Decrypted message: " + str);
     }
-
 }
